@@ -6,15 +6,27 @@ env:
     - TEST_CMD="./script/test.sh"
 
 .com.github.junaruga.ruby-jit-test.definitions:
+  - &container-run
+    script:
+      - |
+        docker run --rm -t test/ruby-jit ${TEST_CMD}
+
   - &test_in_container
     install:
       - |
         docker build --rm -t test/ruby-jit -f ci/Dockerfile-fedora \
           --build-arg BASE_IMAGE=${BASE_IMAGE} \
           .
-    script:
+    <<: *container-run
+
+  - &test_module_in_container
+    install:
       - |
-        docker run --rm -t test/ruby-jit ${TEST_CMD}
+        docker build --rm -t test/ruby-jit -f ci/Dockerfile-rhel \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          --build-arg RUBY_MODULE_STREAM=${RUBY_MODULE_STREAM} \
+          .
+    <<: *container-run
 
 jobs:
   include:
@@ -24,10 +36,10 @@ jobs:
     - env:
         - BASE_IMAGE=fedora:30
       <<: *test_in_container
-    # - env:
-    #     - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
-    #     - RUBY_MODULE_STREAM=2.6
-    #   <<: *test_in_container
+    - env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
+        - RUBY_MODULE_STREAM=2.6
+      <<: *test_module_in_container
   allow_failures:
   fast_finish: true
 branches:
