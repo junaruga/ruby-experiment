@@ -42,22 +42,31 @@ env:
 
 jobs:
   include:
-    - env:
+    - name: "Fedora rawhide Ruby 2.7"
+      env:
+        - BASE_IMAGE=fedora:rawhide
+      <<: *test_in_container
+    - name: "Fedora 31 Ruby 2.6"
+      env:
         - BASE_IMAGE=fedora:31
       <<: *test_in_container
-    - env:
+    - name: "Fedora 30 Ruby 2.6"
+      env:
         - BASE_IMAGE=fedora:30
       <<: *test_in_container
-    - env:
+    - name: "RHEL 8.1 Module Ruby 2.6"
+      env:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
         - RUBY_MODULE_STREAM=2.6
       <<: *test_module_in_container
-    - env:
+    - name: "RHEL 7.7 SCL Ruby 2.6"
+      env:
         - BASE_IMAGE=registry.access.redhat.com/ubi7:7.7
         - RUBY_SCL=rh-ruby26
         - TEST_CMD="scl enable $RUBY_SCL ./script/test.sh"
       <<: *test_scl_in_container
   allow_failures:
+    - name: "RHEL 8.1 Module Ruby 2.6"
   fast_finish: true
 branches:
   except:
