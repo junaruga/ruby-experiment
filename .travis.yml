@@ -1,0 +1,35 @@
+dist: bionic
+language: minimal
+env:
+  global:
+    - BASE_IMAGE=fedora:31
+    - TEST_CMD="./script/test.sh"
+
+.com.github.junaruga.ruby-jit-test.definitions:
+  - &test_in_container
+    install:
+      - |
+        docker build --rm -t test/ruby-jit -f ci/Dockerfile-fedora \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          .
+    script:
+      - |
+        docker run --rm -t test/ruby-jit ${TEST_CMD}
+
+jobs:
+  include:
+    - env:
+        - BASE_IMAGE=fedora:31
+      <<: *test_in_container
+    - env:
+        - BASE_IMAGE=fedora:30
+      <<: *test_in_container
+    # - env:
+    #     - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
+    #     - RUBY_MODULE_STREAM=2.6
+    #   <<: *test_in_container
+  allow_failures:
+  fast_finish: true
+branches:
+  except:
+    - /^wip\//
