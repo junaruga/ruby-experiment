@@ -1,0 +1,21 @@
+# https://access.redhat.com/containers/#/registry.access.redhat.com/ubi7
+ARG BASE_IMAGE=registry.access.redhat.com/ubi7:7.7
+FROM ${BASE_IMAGE}
+
+ARG RUBY_SCL=rh-ruby26
+
+RUN yum -y upgrade && \
+  yum -y install \
+  gcc \
+  redhat-rpm-config \
+  ${RUBY_SCL}-ruby \
+  ${RUBY_SCL}-ruby-devel \
+  scl-utils
+
+# Create a testing user.
+RUN useradd -m tester
+WORKDIR /work
+COPY . .
+RUN chown -R tester:tester /work
+
+USER tester

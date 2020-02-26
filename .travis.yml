@@ -14,7 +14,8 @@ env:
   - &test_in_container
     install:
       - |
-        docker build --rm -t test/ruby-jit -f ci/Dockerfile-fedora \
+        travis_retry docker build --rm -t test/ruby-jit \
+          -f ci/Dockerfile-fedora \
           --build-arg BASE_IMAGE=${BASE_IMAGE} \
           .
     <<: *container-run
@@ -22,9 +23,20 @@ env:
   - &test_module_in_container
     install:
       - |
-        docker build --rm -t test/ruby-jit -f ci/Dockerfile-rhel \
+        travis_retry docker build --rm -t test/ruby-jit \
+          -f ci/Dockerfile-rhel \
           --build-arg BASE_IMAGE=${BASE_IMAGE} \
           --build-arg RUBY_MODULE_STREAM=${RUBY_MODULE_STREAM} \
+          .
+    <<: *container-run
+
+  - &test_scl_in_container
+    install:
+      - |
+        travis_retry docker build --rm -t test/ruby-jit \
+          -f ci/Dockerfile-rhel-scl \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          --build-arg RUBY_SCL=${RUBY_SCL} \
           .
     <<: *container-run
 
@@ -40,6 +52,11 @@ jobs:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
         - RUBY_MODULE_STREAM=2.6
       <<: *test_module_in_container
+    - env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi7:7.7
+        - RUBY_SCL=rh-ruby26
+        - TEST_CMD="scl enable $RUBY_SCL ./script/test.sh"
+      <<: *test_scl_in_container
   allow_failures:
   fast_finish: true
 branches:
