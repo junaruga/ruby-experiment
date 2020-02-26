@@ -1,0 +1,26 @@
+ARG BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
+FROM ${BASE_IMAGE}
+
+ARG RUBY_MODULE_STREAM=2.6
+
+RUN yum module list ruby
+
+RUN yum -y module reset ruby
+RUN yum -y module enable ruby:${RUBY_MODULE_STREAM}
+
+RUN yum -y --allowerasing distro-sync
+RUN yum -y module install ruby:${RUBY_MODULE_STREAM}
+
+RUN yum -y install \
+  gcc \
+  redhat-rpm-config \
+  ruby \
+  ruby-devel
+
+# Create a testing user.
+RUN useradd -m tester
+WORKDIR /work
+COPY . .
+RUN chown -R tester:tester /work
+
+USER tester
