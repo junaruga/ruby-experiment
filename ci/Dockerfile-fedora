@@ -1,0 +1,17 @@
+ARG BASE_IMAGE=fedora:31
+FROM ${BASE_IMAGE}
+
+RUN yum -y upgrade && \
+  yum -y install \
+  gcc \
+  redhat-rpm-config \
+  ruby \
+  ruby-devel
+
+# Create a testing user.
+RUN useradd -m tester
+WORKDIR /work
+COPY . .
+RUN chown -R tester:tester /work
+
+USER tester
