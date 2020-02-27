@@ -19,8 +19,10 @@ gem -v
 # https://github.com/evanphx/benchmark-ips
 gem install --user-install benchmark-ips
 
+# ==================
 # 1: Basic tests
 echo "=== Basic tests ==="
+
 ruby --jit --disable-gems -e 'puts "Hello"'
 ruby --jit -e 'puts "Hello"'
 ruby --jit --jit-verbose=2 -e 'puts "Hello"'
@@ -28,10 +30,18 @@ ruby --jit --jit-verbose=2 -e 'puts "Hello"'
 clear_tmp
 TMP="$(pwd)/tmp" ruby --jit --jit-verbose=2 --jit-save-temps -e 'puts "Hello"'
 ls -1 "$(pwd)/tmp"
-ls "$(pwd)/tmp" | grep '^_ruby_mjit_.*\.gch$'
+ls "$(pwd)/tmp" | grep -q '^_ruby_mjit_.*\.gch$'
 
+clear_tmp
+TMP="$(pwd)/tmp" ruby --disable-gems --jit-verbose=2 --jit-save-temps --jit-min-calls=1 --jit-wait -e '1.times { puts "Hello" }'
+ls -1 "$(pwd)/tmp"
+ls "$(pwd)/tmp" | grep -q '^_ruby_mjit_.*\.gch$'
+ls "$(pwd)/tmp" | grep -q '^_ruby_mjit_.*\.so$'
+
+# ==================
 # 2: Benchmark tests
 echo "=== Benchmark tests ==="
+
 ruby script/bench.rb
 ruby --jit script/bench.rb
 # On Ruby 2.7, the default values of
@@ -43,8 +53,8 @@ ruby --jit --jit-min-calls=5 --jit-max-cache=1000 script/bench.rb
 
 clear_tmp
 TMP="$(pwd)/tmp" ruby --jit --jit-verbose=2 --jit-save-temps --jit-min-calls=5 --jit-max-cache=1000 script/bench.rb
-ls "$(pwd)/tmp"
-ls "$(pwd)/tmp" | grep '^_ruby_mjit_.*\.gch$'
-ls "$(pwd)/tmp" | grep '^_ruby_mjit_.*\.so$'
+ls -1 "$(pwd)/tmp"
+ls "$(pwd)/tmp" | grep -q '^_ruby_mjit_.*\.gch$'
+ls "$(pwd)/tmp" | grep -q '^_ruby_mjit_.*\.so$'
 
 exit 0
