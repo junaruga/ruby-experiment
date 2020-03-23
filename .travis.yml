@@ -6,10 +6,16 @@ env:
     - TEST_CMD="./script/test.sh"
 
 .com.github.junaruga.ruby-jit-test.definitions:
+  # "--privileged" or "--security-opt=seccomp:unconfined"
+  # is necessary to run `setarch`.
+  # https://github.com/moby/moby/issues/20634
+  # Use `--security-opt=seccomp:unconfined`,
+  # as `--privileged` does not work on Travis arm64.
+  # https://travis-ci.community/t/5491
   - &container-run
     script:
       - |
-        docker run --rm -t test/ruby-jit ${TEST_CMD}
+        docker run --rm -t --security-opt=seccomp:unconfined test/ruby-jit ${TEST_CMD}
 
   - &test_in_container
     install:
@@ -58,6 +64,12 @@ jobs:
       env:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
         - RUBY_MODULE_STREAM=2.6
+      <<: *test_module_in_container
+    - name: "RHEL 8.1 Module Ruby 2.6 on `setarch [arch] -R`"
+      env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi8:8.1
+        - RUBY_MODULE_STREAM=2.6
+        - TEST_CMD="setarch $(uname -m) -R ./script/test.sh"
       <<: *test_module_in_container
     - name: "RHEL 7.7 SCL Ruby 2.6"
       env:
