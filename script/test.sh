@@ -39,7 +39,7 @@ ls -1 "${TMP_DIR}"
 ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
 
 clear_tmp
-TMP="${TMP_DIR}" ruby --disable-gems --jit-verbose=2 --jit-save-temps --jit-min-calls=1 --jit-wait -e '1.times { puts "Hello" }'
+TMP="${TMP_DIR}" ruby --disable-gems --jit-verbose=4 --jit-save-temps --jit-min-calls=1 --jit-wait -e '1.times { puts "Hello" }'
 ls -1 "${TMP_DIR}"
 ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
 ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.so$'
