@@ -19,7 +19,9 @@ gem -v
 # Install dependencies
 # An iterations per second (i/s) enhancement to Benchmark.
 # https://github.com/evanphx/benchmark-ips
-gem install --user-install benchmark-ips
+# Installation fails with the latest version 2.8.0.
+# https://github.com/evanphx/benchmark-ips/issues/100
+gem install benchmark-ips --user-install -v 2.7.2
 
 TMP_DIR="$(pwd)/tmp"
 
