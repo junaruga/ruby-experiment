@@ -14,9 +14,10 @@ PCH_CHECK="true"
 # Show the environment
 rpm -q gcc
 rpm -q redhat-rpm-config
-rpm -qf "$(command -v ruby)" || true
 # PATH="/home/root/local/ruby-2.7.1-jit-disable-making-pch/bin:$PATH"
+PATH="/home/root/local/ruby-2.7.1-clang/bin:$PATH"
 command -v ruby
+rpm -qf "$(command -v ruby)" || true
 ruby -v
 gem -v
 
