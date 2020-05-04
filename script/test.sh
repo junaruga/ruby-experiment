@@ -9,10 +9,14 @@ function clear_tmp {
     mkdir "${TMP_DIR}"
 }
 
+PCH_CHECK="true"
+
 # Show the environment
 rpm -q gcc
 rpm -q redhat-rpm-config
 rpm -qf "$(command -v ruby)" || true
+# PATH="/home/root/local/ruby-2.7.1-jit-disable-making-pch/bin:$PATH"
+command -v ruby
 ruby -v
 gem -v
 
@@ -36,13 +40,17 @@ ruby --jit --jit-verbose=2 -e 'puts "Hello"'
 clear_tmp
 TMP="${TMP_DIR}" ruby --jit --jit-verbose=2 --jit-save-temps -e 'puts "Hello"'
 ls -1 "${TMP_DIR}"
-ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
+if [ "${PCH_CHECK}" = "true" ]; then
+  ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
+fi
 
 clear_tmp
 TMP="${TMP_DIR}" ruby --disable-gems --jit-verbose=2 --jit-save-temps --jit-min-calls=1 --jit-wait -e '1.times { puts "Hello" }'
 ls -1 "${TMP_DIR}"
-ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
-ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.so$'
+if [ "${PCH_CHECK}" = "true" ]; then
+  ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
+  ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.so$'
+fi
 
 # ==================
 # 2: Benchmark tests
@@ -60,7 +68,9 @@ ruby --jit --jit-min-calls=5 --jit-max-cache=1000 "${TOP_DIR}/script/bench.rb"
 clear_tmp
 TMP="${TMP_DIR}" ruby --jit --jit-verbose=2 --jit-save-temps --jit-min-calls=5 --jit-max-cache=1000 "${TOP_DIR}/script/bench.rb"
 ls -1 "${TMP_DIR}"
-ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
-ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.so$'
+if [ "${PCH_CHECK}" = "true" ]; then
+  ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
+  ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.so$'
+fi
 
 exit 0
