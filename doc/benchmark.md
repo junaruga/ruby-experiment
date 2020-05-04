@@ -6,14 +6,16 @@ Benchmark the following cases for Ruby 2.7.1.
 2. Ruby 2.7.1 (tag: v2_7_1 + 1 commit to disable PCH explictly) with gcc. See `junaruga/ruby` repository `feature/jit-disable-making-pch-on-v2_7_1`branch.
 3. Ruby 2.7.1 clang(tag: v2_7_1) with clang.
 
-## How to disable PCH explicitly
+## How?
+
+### How to disable PCH explicitly
 
 For the 2nd case, here is the way to disable PCH explicitly.
 
 Diable making PCH by the following patch.
 
 ```
-diff --git a/mjit_worker.c b/mjit_worker.c
+$ diff --git a/mjit_worker.c b/mjit_worker.c
 index ce8133ac7d..109f584c27 100644
 --- a/mjit_worker.c
 +++ b/mjit_worker.c
@@ -34,17 +36,44 @@ index ce8133ac7d..109f584c27 100644
 Then bulid.
 
 ```
-autoconf
-./configure \
+$ autoconf
+$ ./configure \
   --prefix=/home/root/local/ruby-2.7.1-jit-disable-making-pch \
   --enable-shared
-make
-sudo make install
+$ make
+$ sudo make install
+```
+
+### How to build with clang
+
+```
+$ autoconf
+$ CC=clang ./configure \
+  --prefix=/home/root/local/ruby-2.7.1-clang \
+  --enable-shared
+$ make
+$ sudo make install
 ```
 
 ## Result
 
 ### Fedora 31
+
+Tested with the following packages.
+
+```
+$ rpm -q gcc
+gcc-9.3.1-2.fc31.x86_64
+
+$ rpm -q clang
+clang-9.0.1-2.fc31.x86_64
+
+$ gem list benchmark-ips
+
+*** LOCAL GEMS ***
+
+benchmark-ips (2.7.2)
+```
 
 #### Case 1: Ruby 2.7.1 with gcc
 
@@ -110,4 +139,35 @@ Calculating -------------------------------------
            calculate      1.462k (± 2.0%) i/s -      7.308k in   5.000452s
 ```
 
+#### Case 3: Ruby 2.7.1 with clang
+
+```
++ ruby script/../script/bench.rb
+Warming up --------------------------------------
+           calculate    12.000  i/100ms
+           calculate    12.000  i/100ms
+           calculate    12.000  i/100ms
+Calculating -------------------------------------
+           calculate      1.542k (± 2.8%) i/s -      7.704k in   5.002345s
+           calculate      1.508k (± 2.7%) i/s -      7.536k in   5.001676s
+           calculate      1.507k (± 2.4%) i/s -      7.536k in   5.003805s
++ ruby --jit script/../script/bench.rb
+Warming up --------------------------------------
+           calculate    12.000  i/100ms
+           calculate    12.000  i/100ms
+           calculate    12.000  i/100ms
+Calculating -------------------------------------
+           calculate      1.514k (± 3.2%) i/s -      7.560k in   5.000305s
+           calculate      1.529k (± 1.5%) i/s -      7.644k in   4.999730s
+           calculate      1.526k (± 1.5%) i/s -      7.632k in   5.002867s
++ ruby --jit --jit-min-calls=5 --jit-max-cache=1000 script/../script/bench.rb
+Warming up --------------------------------------
+           calculate    11.000  i/100ms
+           calculate    33.000  i/100ms
+           calculate    60.000  i/100ms
+Calculating -------------------------------------
+           calculate     36.245k (± 5.8%) i/s -    180.240k in   4.997412s
+           calculate     36.213k (± 4.7%) i/s -    180.480k in   4.997622s
+           calculate     34.513k (± 7.7%) i/s -    171.060k in   4.997318s
+```
 
