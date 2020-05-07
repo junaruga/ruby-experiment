@@ -59,7 +59,7 @@ $ sudo make install
 
 ### Fedora 31
 
-Tested with the following packages.
+Test with the following packages.
 
 ```
 $ rpm -q gcc
@@ -171,3 +171,123 @@ Calculating -------------------------------------
            calculate     34.513k (± 7.7%) i/s -    171.060k in   4.997318s
 ```
 
+### RHEL 8.2 (mock environment)
+
+Test with the following packages.
+
+```
+$ rpm -q gcc
+gcc-8.3.1-5.el8.x86_64
+
+$ rpm -q clang
+clang-9.0.1-2.module+el8.2.0+5494+7b8075cf.x86_64
+
+$ gem list benchmark-ips
+
+*** LOCAL GEMS ***
+
+benchmark-ips (2.7.2)
+```
+
+Install the following RPM packages in advance to the mock environment.
+
+```
+yum autoconf gdbm-devel libffi-devel openssl-devel libyaml-devel readline-devel procps multilib-rpm-config gcc zlib-devel clang ruby ruby-devel bison
+```
+
+#### Case 1: Ruby 2.7.1 with gcc
+
+```
++ ruby script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+Calculating -------------------------------------
+           calculate    282.461  (± 2.1%) i/s -      1.415k in   5.012423s
+           calculate    283.816  (± 2.5%) i/s -      1.420k in   5.006874s
+           calculate    288.650  (± 0.7%) i/s -      1.445k in   5.006260s
++ ruby --jit script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+Calculating -------------------------------------
+           calculate    287.992  (± 0.7%) i/s -      1.440k in   5.000391s
+           calculate    287.090  (± 1.4%) i/s -      1.440k in   5.016940s
+           calculate    284.554  (± 2.1%) i/s -      1.425k in   5.010193s
++ ruby --jit --jit-min-calls=5 --jit-max-cache=1000 script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     4.000  i/100ms
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+Calculating -------------------------------------
+           calculate    285.795  (± 0.7%) i/s -      1.430k in   5.003995s
+           calculate    284.122  (± 2.5%) i/s -      1.420k in   5.001124s
+           calculate    284.562  (± 1.4%) i/s -      1.425k in   5.008767s
+```
+
+
+#### Case 2: Ruby 2.7.1 disabling making PCH with gcc
+
+```
++ ruby script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+Calculating -------------------------------------
+           calculate    365.446  (± 1.6%) i/s -      1.830k in   5.008931s
+           calculate    361.716  (± 1.1%) i/s -      1.812k in   5.009961s
+           calculate    359.241  (± 0.8%) i/s -      1.800k in   5.010823s
++ ruby --jit script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+Calculating -------------------------------------
+           calculate    362.450  (± 1.9%) i/s -      1.812k in   5.001645s
+           calculate    358.972  (± 2.0%) i/s -      1.794k in   4.999507s
+           calculate    359.031  (± 2.2%) i/s -      1.800k in   5.015893s
++ ruby --jit --jit-min-calls=5 --jit-max-cache=1000 script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+           calculate     5.000  i/100ms
+Calculating -------------------------------------
+           calculate    295.370  (± 1.4%) i/s -      1.480k in   5.011644s
+           calculate    295.359  (± 0.7%) i/s -      1.480k in   5.011172s
+           calculate    294.600  (± 1.4%) i/s -      1.475k in   5.008024s
+```
+
+#### Case 3: Ruby 2.7.1 with clang
+
+```
++ ruby script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+Calculating -------------------------------------
+           calculate    402.690  (± 2.0%) i/s -      2.016k in   5.008176s
+           calculate    397.647  (± 2.8%) i/s -      1.992k in   5.013852s
+           calculate    403.281  (± 2.5%) i/s -      2.016k in   5.002705s
++ ruby --jit script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+           calculate     6.000  i/100ms
+Calculating -------------------------------------
+           calculate    404.065  (± 1.0%) i/s -      2.022k in   5.004813s
+           calculate    402.804  (± 1.5%) i/s -      2.016k in   5.006360s
+           calculate    402.548  (± 1.2%) i/s -      2.016k in   5.008849s
++ ruby --jit --jit-min-calls=5 --jit-max-cache=1000 script/../script/bench.rb
+Warming up --------------------------------------
+           calculate     6.000  i/100ms
+           calculate    11.000  i/100ms
+           calculate    56.000  i/100ms
+Calculating -------------------------------------
+           calculate     31.776k (± 4.0%) i/s -    158.424k in   4.996475s
+           calculate     32.434k (± 4.7%) i/s -    161.616k in   4.997209s
+           calculate     32.332k (± 4.3%) i/s -    161.224k in   4.997374s
+```
