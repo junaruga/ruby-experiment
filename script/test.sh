@@ -46,7 +46,7 @@ if [ "${PCH_CHECK}" = "true" ]; then
 fi
 
 clear_tmp
-TMP="${TMP_DIR}" ruby --disable-gems --jit-verbose=2 --jit-save-temps --jit-min-calls=1 --jit-wait -e '1.times { puts "Hello" }'
+TMP="${TMP_DIR}" ruby --disable-gems --jit --jit-verbose=2 --jit-save-temps --jit-min-calls=1 --jit-wait -e '1.times { puts "Hello" }'
 ls -1 "${TMP_DIR}"
 if [ "${PCH_CHECK}" = "true" ]; then
   ls "${TMP_DIR}" | grep -q '^_ruby_mjit_.*\.gch$'
